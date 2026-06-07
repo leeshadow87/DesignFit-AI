@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>설계핏 AI v1.2 | PC 도면 셀프체크 워크벤치</title>
+    <meta name="description" content="CAD 작업자를 위한 PC 기반 제조 관점 DFM 리스크 분석 워크벤치" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="주요 메뉴">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">DF</div>
+          <div>
+            <strong>설계핏 AI</strong>
+            <span>AI 설계선배</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item active" data-panel="review">
+            <span aria-hidden="true">⌁</span>
+            새 검토
+          </button>
+          <button class="nav-item" data-panel="samples">
+            <span aria-hidden="true">▦</span>
+            샘플 분석
+          </button>
+          <button class="nav-item" data-panel="gdt">
+            <span aria-hidden="true">◎</span>
+            GD&amp;T 질문
+          </button>
+          <button class="nav-item" data-panel="history">
+            <span aria-hidden="true">◴</span>
+            저장 내역
+          </button>
+        </nav>
+
+        <div class="sidebar-note">
+          <strong>PC First MVP</strong>
+          <span>CAD 옆에 띄워두고 쓰는 도면 검토 보조 워크벤치</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">PC CAD Review Workbench · v1.2</p>
+            <h1>CAD 작업 중 바로 옆에 띄워두는 제조 관점 도면 셀프체크.</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-button" id="loadShaft">샤프트 예시</button>
+            <button class="primary-button" id="runAnalysisTop">분석 실행</button>
+          </div>
+        </header>
+
+        <section class="hero-strip" aria-label="설계 리스크 요약">
+          <div class="hero-copy">
+            <strong>입력 → 분석 → 리포트</strong>
+            <span>주니어 설계자가 도면 제출 전 공차, GD&amp;T, 공정 리스크를 PC 화면에서 빠르게 정리합니다.</span>
+          </div>
+          <canvas id="partCanvas" width="560" height="180" aria-label="샤프트 공차 리스크 시각화"></canvas>
+        </section>
+
+        <section class="panel active" id="panel-review">
+          <div class="workspace-grid">
+            <form class="input-surface" id="reviewForm">
+              <div class="section-heading">
+                <p class="eyebrow">Design Input</p>
+              <h2>CAD 도면 조건</h2>
+              </div>
+
+              <div class="form-grid">
+                <label>
+                  부품 유형
+                  <select id="partType" required>
+                    <option value="shaft">샤프트</option>
+                    <option value="housing">하우징</option>
+                    <option value="bracket">브라켓</option>
+                    <option value="gear">기어</option>
+                    <option value="weldment">판금/용접품</option>
+                    <option value="aero">항공 엔진 부품</option>
+                  </select>
+                </label>
+
+                <label>
+                  재질
+                  <select id="material" required>
+                    <option value="scm">SCM420 / 합금강</option>
+                    <option value="aluminum">알루미늄</option>
+                    <option value="carbon">탄소강</option>
+                    <option value="stainless">스테인리스</option>
+                    <option value="titanium">티타늄</option>
+                    <option value="inconel">인코넬</option>
+                  </select>
+                </label>
+
+                <label>
+                  주요 공정
+                  <select id="process" required>
+                    <option value="turning">선삭</option>
+                    <option value="milling">밀링</option>
+                    <option value="boring">보링</option>
+                    <option value="grinding">연삭</option>
+                    <option value="honing">호닝</option>
+                    <option value="edm">방전</option>
+                    <option value="welding">용접</option>
+                  </select>
+                </label>
+
+                <label>
+                  검사 방식
+                  <select id="inspection">
+                    <option value="general">일반 측정기</option>
+                    <option value="cmm">CMM</option>
+                    <option value="gauge">전용 게이지</option>
+                    <option value="vision">비전 검사</option>
+                  </select>
+                </label>
+
+                <label>
+                  치수 공차
+                  <input id="dimTolerance" type="number" step="0.001" min="0.001" value="0.01" />
+                </label>
+
+                <label>
+                  형상/위치 공차
+                  <input id="geoTolerance" type="number" step="0.001" min="0.001" value="0.005" />
+                </label>
+              </div>
+
+              <label class="wide-label">
+                GD&amp;T 또는 주요 요구사항
+                <input id="gdtInput" value="원통도 0.005, Datum A 기준 동심도 관리" />
+              </label>
+
+              <label class="wide-label">
+                설계 고민
+                  <textarea id="concern" rows="4">CAD 도면 검토 중 현재 공차가 과도한지, 연삭 공정 추가 없이 양산 관리가 가능한지 확인하고 싶습니다.</textarea>
+              </label>
+
+              <div class="form-actions">
+                <button type="button" class="ghost-button" id="resetForm">초기화</button>
+                <button type="submit" class="primary-button">DFM 분석</button>
+              </div>
+            </form>
+
+            <section class="result-surface" aria-live="polite">
+              <div class="section-heading">
+                <p class="eyebrow">AI Analysis</p>
+                <h2>분석 결과</h2>
+              </div>
+
+              <div class="risk-summary">
+                <div class="score-ring" id="scoreRing">
+                  <span id="riskScore">78</span>
+                  <small>/100</small>
+                </div>
+                <div>
+                  <span class="status-pill high" id="riskLevel">높음</span>
+                  <h3 id="riskTitle">정밀 공차와 검사 난이도 복합 리스크</h3>
+                  <p id="riskSummary">
+                    일반 선삭 기준으로 원통도 0.005는 관리 난이도가 높아 연삭 또는 추가 검사 공정이 필요할 수 있습니다.
+                  </p>
+                </div>
+              </div>
+
+              <div class="metric-row">
+                <div>
+                  <span>제조 난이도</span>
+                  <strong id="manufacturingMetric">높음</strong>
+                </div>
+                <div>
+                  <span>검사 리스크</span>
+                  <strong id="inspectionMetric">높음</strong>
+                </div>
+                <div>
+                  <span>ECO 가능성</span>
+                  <strong id="ecoMetric">보통</strong>
+                </div>
+              </div>
+
+              <div class="analysis-list" id="analysisList"></div>
+
+              <div class="consult-box">
+                <div class="consult-heading">
+                  <strong>협의 문구</strong>
+                  <button class="small-button" id="copyConsult" type="button">복사</button>
+                </div>
+                <p id="consultText"></p>
+              </div>
+
+              <div class="result-actions">
+                <button class="ghost-button" id="saveResult" type="button">결과 저장</button>
+                <button class="ghost-button" id="printResult" type="button">PDF 저장</button>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="panel" id="panel-samples">
+          <div class="section-heading">
+            <p class="eyebrow">Sample Analysis</p>
+            <h2>부품별 샘플</h2>
+          </div>
+          <div class="sample-grid" id="sampleGrid"></div>
+        </section>
+
+        <section class="panel" id="panel-gdt">
+          <div class="question-layout">
+            <div>
+              <div class="section-heading">
+                <p class="eyebrow">GD&amp;T Assistant</p>
+                <h2>제조 관점 해석</h2>
+              </div>
+              <div class="question-bank" id="questionBank"></div>
+            </div>
+            <div class="answer-surface">
+              <strong id="gdtQuestion">위치도 0.02는 왜 제조 리스크가 있나요?</strong>
+              <p id="gdtAnswer">
+                위치도는 가공보다 기준 설정과 검사 재현성이 중요합니다. Datum A/B/C가 실제 클램핑 기준과 다르면 CMM 측정 결과와 조립성이 다르게 나타날 수 있습니다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="panel-history">
+          <div class="section-heading">
+            <p class="eyebrow">Saved Reviews</p>
+            <h2>저장 내역</h2>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
