@@ -10,6 +10,7 @@ import ToleranceCaseTable from "./ToleranceCaseTable";
 import CaseDetailPanel from "./CaseDetailPanel";
 import PdfViewer from "./PdfViewer";
 import ReportPanel from "./ReportPanel";
+import SimulationPanel from "./SimulationPanel";
 
 export default function DrawingAnalysisClient({ drawingId }: { drawingId: string }) {
   const [drawing, setDrawing] = useState<Drawing | null>(null);
@@ -19,7 +20,7 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
   const [selected, setSelected] = useState<ToleranceCase | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"table" | "report">("table");
+  const [activeTab, setActiveTab] = useState<"table" | "simulation" | "report">("table");
   const [manualText, setManualText] = useState("");
   const [showManual, setShowManual] = useState(false);
 
@@ -219,11 +220,12 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
           <div className="flex border-b border-slate-200 bg-white px-4">
             {[
               { key: "table", label: `공차 검토 목록 ${hasCases ? `(${cases.length})` : ""}` },
+              { key: "simulation", label: "완화 시뮬레이션" },
               { key: "report", label: "리포트" },
             ].map(({ key, label }) => (
               <button
                 key={key}
-                onClick={() => setActiveTab(key as "table" | "report")}
+                onClick={() => setActiveTab(key as "table" | "simulation" | "report")}
                 className={`px-4 py-3 text-xs font-bold border-b-2 transition-colors ${
                   activeTab === key
                     ? "border-teal-600 text-teal-700"
@@ -236,7 +238,11 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
           </div>
 
           <div className="flex-1 flex overflow-hidden">
-            {activeTab === "table" ? (
+            {activeTab === "simulation" ? (
+              <div className="flex-1 overflow-auto">
+                <SimulationPanel cases={cases} />
+              </div>
+            ) : activeTab === "table" ? (
               <>
                 {/* 공차 목록 */}
                 <div className={`overflow-auto ${selected ? "w-[55%]" : "w-full"} border-r border-slate-200`}>
@@ -272,6 +278,7 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
                 />
               </div>
             )}
+
           </div>
         </div>
       </div>

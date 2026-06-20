@@ -458,3 +458,116 @@ export function statusLabel(status: RecommendationStatus): string {
     keep: "유지 권장",
   }[status];
 }
+
+// ============================================================
+// 완화 시뮬레이션
+// ============================================================
+
+export interface SimulationResult {
+  proposedTolerance: number;
+  proposedRisk: RiskLevel;
+  proposedScore: number;
+  verdict: "가능" | "조건부 가능" | "불가";
+  verdictReason: string;
+  maxRecommended: number;
+  maxRecommendedUnit: string;
+}
+
+const RISK_ORDER: Record<RiskLevel, number> = { low: 1, medium: 2, high: 3, critical: 4 };
+
+// 특정 제안값에 대한 완화 시뮬레이션
+export function simulateRelaxation(
+  originalInput: RuleInput,
+  proposedTolerance: number
+): SimulationResult {
+  if (proposedTolerance <= originalInput.currentTolerance) {
+    return {
+      proposedTolerance,
+      proposedRisk: originalInput.toleranceType === "plus_minus" ? "critical" : "critical",
+      proposedScore: 0,
+      verdict: "불가",
+      verdictReason: "제안값이 현재 공차보다 작습니다. 완화(완緩)는 공차값을 키우는 방향입니다.",
+      maxRecommended: originalInput.currentTolerance,
+      maxRecommendedUnit: getUnit(originalInput.toleranceType),
+    };
+  }
+
+  const proposed = evaluateTolerance({ ...originalInput, currentTolerance: proposedTolerance });
+  const origRiskOrder = RISK_ORDER[getOriginalRisk(originalInput)];
+  const propRiskOrder = RISK_ORDER[proposed.riskLevel];
+
+  let verdict: "가능" | "조건부 가능" | "불가";
+  let verdictReason: string;
+
+  if (proposed.riskLevel === "low" || proposed.riskLevel === "medium") {
+    verdict = "가능";
+    verdictReason = `완화 후 위험도가 ${riskLabel(proposed.riskLevel)} 수준으로 유지됩니다. ${proposed.reason}`;
+  } else if (propRiskOrder <= origRiskOrder) {
+    verdict = "조건부 가능";
+    verdictReason = `위험도 변화 없음(${riskLabel(proposed.riskLevel)}). 기능 확인 후 적용 가능. ${proposed.reason}`;
+  } else if (proposed.riskLevel === "high") {
+    verdict = "조건부 가능";
+    verdictReason = `완화 후 HIGH 위험 수준. 선임자 검토 및 기능 재확인 필요. ${proposed.reason}`;
+  } else {
+    verdict = "불가";
+    verdictReason = `완화 후 CRITICAL 위험 수준으로 상승. 추가 완화 불가. ${proposed.reason}`;
+  }
+
+  const maxRec = findMaxRelaxation(originalInput);
+
+  return {
+    proposedTolerance,
+    proposedRisk: proposed.riskLevel,
+    proposedScore: proposed.riskScore,
+    verdict,
+    verdictReason,
+    maxRecommended: maxRec.maxValue,
+    maxRecommendedUnit: getUnit(originalInput.toleranceType),
+  };
+}
+
+// 완화 가능 최대값 탐색 (MEDIUM 이하를 유지하는 최대 공차)
+export function findMaxRelaxation(input: RuleInput): { maxValue: number; atRisk: RiskLevel } {
+  const { toleranceType, currentTolerance } = input;
+
+  // 탐색 후보 값 목록 (타입별 의미있는 breakpoint)
+  const candidates = getCandidates(toleranceType, currentTolerance);
+
+  let maxValue = currentTolerance;
+  let atRisk: RiskLevel = getOriginalRisk(input);
+
+  for (const candidate of candidates) {
+    if (candidate <= currentTolerance) continue;
+    const result = evaluateTolerance({ ...input, currentTolerance: candidate });
+    if (RISK_ORDER[result.riskLevel] <= 2) { // low or medium
+      maxValue = candidate;
+      atRisk = result.riskLevel;
+    } else {
+      break;
+    }
+  }
+
+  return { maxValue, atRisk };
+}
+
+function getOriginalRisk(input: RuleInput): RiskLevel {
+  return evaluateTolerance(input).riskLevel;
+}
+
+function getCandidates(type: ToleranceType, current: number): number[] {
+  if (type === "plus_minus" || type === "asymmetric") {
+    return [0.005, 0.01, 0.02, 0.03, 0.05, 0.08, 0.1, 0.15, 0.2, 0.3, 0.5, 1.0]
+      .filter((v) => v > current);
+  }
+  if (type === "roughness") {
+    return [0.4, 0.8, 1.6, 3.2, 6.3, 12.5].filter((v) => v > current);
+  }
+  // GD&T
+  return [0.005, 0.01, 0.02, 0.03, 0.05, 0.08, 0.1, 0.15, 0.2, 0.3, 0.5]
+    .filter((v) => v > current);
+}
+
+function getUnit(type: ToleranceType): string {
+  if (type === "roughness") return "μm";
+  return "mm";
+}
