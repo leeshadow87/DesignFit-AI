@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #0f766e;
+  --brand-dark: #0b5f59;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #f5f8fa;
+  color: #17202a;
+  font-family: Inter, Pretendard, "Segoe UI", "Noto Sans KR", Arial, sans-serif;
+}
+
+/* 스크롤바 */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* 위험도 뱃지 */
+.badge-critical { @apply bg-red-100 text-red-700 border border-red-200; }
+.badge-high     { @apply bg-orange-100 text-orange-700 border border-orange-200; }
+.badge-medium   { @apply bg-yellow-100 text-yellow-700 border border-yellow-200; }
+.badge-low      { @apply bg-green-100 text-green-700 border border-green-200; }
+
+/* 추천 상태 뱃지 */
+.status-relax_candidate { @apply bg-teal-100 text-teal-700 border border-teal-200; }
+.status-conditional     { @apply bg-amber-100 text-amber-700 border border-amber-200; }
+.status-need_check      { @apply bg-orange-100 text-orange-700 border border-orange-200; }
+.status-keep            { @apply bg-slate-100 text-slate-600 border border-slate-200; }
