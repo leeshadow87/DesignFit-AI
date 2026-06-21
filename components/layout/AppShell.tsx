@@ -1,11 +1,12 @@
 "use client";
+
 import Sidebar from "./Sidebar";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen bg-[var(--df-bg)] text-[var(--df-ink)] lg:grid lg:grid-cols-[256px_minmax(0,1fr)]">
       <Sidebar />
-      <main className="flex-1 ml-64 min-h-screen">{children}</main>
+      <main className="min-w-0">{children}</main>
     </div>
   );
 }

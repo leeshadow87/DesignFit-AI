@@ -3,8 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --brand: #0f766e;
-  --brand-dark: #0b5f59;
+  --df-bg: #f4f7f9;
+  --df-panel: #ffffff;
+  --df-ink: #17212b;
+  --df-muted: #667485;
+  --df-line: #d8e0e7;
+  --df-navy: #172936;
+  --df-navy-2: #203747;
+  --df-green: #03c75a;
+  --df-teal: #087d73;
+  --df-red: #c92a2a;
+  --df-orange: #d97706;
+  --df-yellow: #b08900;
+  --df-blue: #2563eb;
 }
 
 * {
@@ -16,25 +27,70 @@ html {
 }
 
 body {
-  background: #f5f8fa;
-  color: #17202a;
-  font-family: Inter, Pretendard, "Segoe UI", "Noto Sans KR", Arial, sans-serif;
+  margin: 0;
+  background: var(--df-bg);
+  color: var(--df-ink);
+  font-family: Pretendard, "Noto Sans KR", Inter, "Segoe UI", Arial, sans-serif;
+  letter-spacing: 0;
 }
 
-/* 스크롤바 */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
 
-/* 위험도 뱃지 */
-.badge-critical { @apply bg-red-100 text-red-700 border border-red-200; }
-.badge-high     { @apply bg-orange-100 text-orange-700 border border-orange-200; }
-.badge-medium   { @apply bg-yellow-100 text-yellow-700 border border-yellow-200; }
-.badge-low      { @apply bg-green-100 text-green-700 border border-green-200; }
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 
-/* 추천 상태 뱃지 */
-.status-relax_candidate { @apply bg-teal-100 text-teal-700 border border-teal-200; }
-.status-conditional     { @apply bg-amber-100 text-amber-700 border border-amber-200; }
-.status-need_check      { @apply bg-orange-100 text-orange-700 border border-orange-200; }
-.status-keep            { @apply bg-slate-100 text-slate-600 border border-slate-200; }
+::-webkit-scrollbar-track {
+  background: #eef3f6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b9c5cf;
+  border-radius: 8px;
+}
+
+.df-card {
+  @apply rounded-lg border border-slate-200 bg-white shadow-sm;
+}
+
+.df-button {
+  @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50;
+}
+
+.df-button-primary {
+  @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-teal-700 bg-teal-700 px-4 text-sm font-extrabold text-white transition-colors hover:bg-teal-800;
+}
+
+.df-button-green {
+  @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#03c75a] bg-[#03c75a] px-4 text-sm font-extrabold text-[#06291a] transition-colors hover:brightness-95;
+}
+
+.badge-critical {
+  @apply border border-red-200 bg-red-50 text-red-700;
+}
+
+.badge-high {
+  @apply border border-orange-200 bg-orange-50 text-orange-700;
+}
+
+.badge-medium {
+  @apply border border-yellow-200 bg-yellow-50 text-yellow-700;
+}
+
+.badge-low {
+  @apply border border-teal-200 bg-teal-50 text-teal-700;
+}
+
+.technical-grid {
+  background:
+    linear-gradient(#edf2f6 1px, transparent 1px),
+    linear-gradient(90deg, #edf2f6 1px, transparent 1px),
+    #ffffff;
+  background-size: 22px 22px;
+}

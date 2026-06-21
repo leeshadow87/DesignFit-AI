@@ -1,10 +1,11 @@
 "use client";
+
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, ShieldAlert } from "lucide-react";
 import { repository } from "@/lib/repository";
 import type { Project } from "@/types";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 
 export default function NewProjectClient() {
   const router = useRouter();
@@ -13,10 +14,11 @@ export default function NewProjectClient() {
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
+
     const project: Project = {
       id: `proj-${Date.now()}`,
       name: name.trim(),
@@ -26,68 +28,73 @@ export default function NewProjectClient() {
       updatedAt: new Date().toISOString(),
       drawingCount: 0,
     };
+
     await repository.saveProject(project);
     router.push(`/projects/${project.id}`);
   }
 
   return (
-    <div className="p-8 max-w-xl">
-      <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 mb-6">
-        <ArrowLeft size={14} /> 대시보드로
+    <div className="max-w-2xl p-4 lg:p-8">
+      <Link href="/projects" className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800">
+        <ArrowLeft size={14} /> 프로젝트 목록
       </Link>
 
-      <p className="text-xs font-black text-teal-600 uppercase tracking-widest mb-2">New Project</p>
-      <h1 className="text-2xl font-black text-slate-800 mb-6">새 프로젝트 만들기</h1>
+      <p className="text-xs font-black uppercase tracking-[0.22em] text-teal-700">New Project</p>
+      <h1 className="mt-1 text-2xl font-black text-slate-900">새 검토 프로젝트</h1>
+      <p className="mt-2 text-sm leading-relaxed text-slate-500">
+        V4 시제품에서는 샘플 도면과 공개 도면만 사용하세요. 실제 고객명은 필요할 때만
+        익명화해서 입력하는 것을 권장합니다.
+      </p>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
+      <div className="my-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <p className="flex items-start gap-2">
+          <ShieldAlert size={16} className="mt-0.5 flex-shrink-0" />
+          보안 도면, 사내 도번, 고객사 실명은 입력하지 마세요. 운영 저장소 적용 전까지는 검증용입니다.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="df-card space-y-5 p-6">
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1.5">
-            프로젝트 이름 <span className="text-red-500">*</span>
+          <label className="mb-1.5 block text-sm font-black text-slate-700">
+            프로젝트명 <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="예: 유압 실린더 V2 도면 검토"
-            className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            onChange={(event) => setName(event.target.value)}
+            placeholder="예: 터빈 디스크 공차 완화 검토"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1.5">고객사 / 담당자</label>
+          <label className="mb-1.5 block text-sm font-black text-slate-700">고객/사업부 별칭</label>
           <input
             type="text"
             value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            placeholder="예: ABC 자동화"
-            className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            onChange={(event) => setCustomerName(event.target.value)}
+            placeholder="예: 내부 검증, 샘플 프로젝트"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1.5">설명 / 메모</label>
+          <label className="mb-1.5 block text-sm font-black text-slate-700">검토 메모</label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="이 프로젝트의 목적, 검토 배경 등을 입력하세요."
-            rows={3}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder="검토 목적, 공정 가정, 샘플 도면 출처를 간단히 기록하세요."
+            rows={4}
+            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           />
         </div>
 
         <div className="flex gap-3 pt-2">
-          <Link
-            href="/"
-            className="flex-1 text-center px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
-          >
+          <Link href="/projects" className="df-button flex-1">
             취소
           </Link>
-          <button
-            type="submit"
-            disabled={!name.trim() || saving}
-            className="flex-1 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors"
-          >
+          <button type="submit" disabled={!name.trim() || saving} className="df-button-primary flex-1 disabled:opacity-50">
             {saving ? "저장 중..." : "프로젝트 만들기"}
           </button>
         </div>

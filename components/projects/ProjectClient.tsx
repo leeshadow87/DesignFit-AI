@@ -1,13 +1,12 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Upload, FileText, Loader2, Trash2, Play } from "lucide-react";
+import { ArrowLeft, FileText, Loader2, Play, ShieldAlert, Trash2, Upload } from "lucide-react";
 import { repository, saveDrawingFile } from "@/lib/repository";
-import type { Project, Drawing } from "@/types";
+import type { Drawing, Project } from "@/types";
 
 export default function ProjectClient({ projectId }: { projectId: string }) {
-  const router = useRouter();
   const [project, setProject] = useState<Project | null>(null);
   const [drawings, setDrawings] = useState<Drawing[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -18,13 +17,12 @@ export default function ProjectClient({ projectId }: { projectId: string }) {
     repository.getDrawings(projectId).then(setDrawings);
   }, [projectId]);
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !file.name.endsWith(".pdf")) return;
+  async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file || !file.name.toLowerCase().endsWith(".pdf")) return;
     setUploading(true);
 
     try {
-      // base64 저장
       const dataUrl = await fileToDataUrl(file);
       const drawingId = `drw-${Date.now()}`;
       const drawing: Drawing = {
@@ -36,12 +34,16 @@ export default function ProjectClient({ projectId }: { projectId: string }) {
         status: "pending",
         createdAt: new Date().toISOString(),
       };
+
       saveDrawingFile(drawingId, dataUrl);
       await repository.saveDrawing(drawing);
 
-      // 프로젝트 drawingCount 증가
       if (project) {
-        const updated: Project = { ...project, drawingCount: project.drawingCount + 1, updatedAt: new Date().toISOString() };
+        const updated = {
+          ...project,
+          drawingCount: project.drawingCount + 1,
+          updatedAt: new Date().toISOString(),
+        };
         await repository.saveProject(updated);
         setProject(updated);
       }
@@ -54,97 +56,95 @@ export default function ProjectClient({ projectId }: { projectId: string }) {
   }
 
   async function deleteDrawing(id: string) {
-    if (!confirm("이 도면을 삭제합니까?")) return;
+    if (!confirm("도면을 삭제할까요? 분석 결과도 함께 삭제됩니다.")) return;
     await repository.deleteDrawing(id);
-    setDrawings((prev) => prev.filter((d) => d.id !== id));
+    setDrawings((prev) => prev.filter((drawing) => drawing.id !== id));
     if (project) {
-      const updated: Project = { ...project, drawingCount: Math.max(0, project.drawingCount - 1), updatedAt: new Date().toISOString() };
+      const updated = {
+        ...project,
+        drawingCount: Math.max(0, project.drawingCount - 1),
+        updatedAt: new Date().toISOString(),
+      };
       await repository.saveProject(updated);
       setProject(updated);
     }
   }
 
   if (!project) {
-    return <div className="p-8 text-slate-400">프로젝트를 불러오는 중...</div>;
+    return <div className="p-8 text-sm text-slate-500">프로젝트를 불러오는 중입니다.</div>;
   }
 
   return (
-    <div className="p-8">
-      <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 mb-6">
-        <ArrowLeft size={14} /> 대시보드로
+    <div className="p-4 lg:p-8">
+      <Link href="/projects" className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800">
+        <ArrowLeft size={14} /> 프로젝트 목록
       </Link>
 
-      <div className="flex items-start justify-between mb-8">
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-xs font-black text-teal-600 uppercase tracking-widest mb-1">Project</p>
-          <h1 className="text-3xl font-black text-slate-800">{project.name}</h1>
-          {project.customerName && <p className="text-slate-400 mt-1 text-sm">{project.customerName}</p>}
-          {project.description && <p className="text-slate-500 mt-2 text-sm max-w-lg">{project.description}</p>}
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-teal-700">Project</p>
+          <h1 className="mt-1 text-3xl font-black text-slate-900">{project.name}</h1>
+          {project.customerName && <p className="mt-1 text-sm text-slate-500">{project.customerName}</p>}
+          {project.description && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">{project.description}</p>}
         </div>
 
         <div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf"
-            className="hidden"
-            onChange={handleFileUpload}
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="flex items-center gap-2 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 disabled:opacity-60 text-white text-sm font-bold rounded-lg transition-colors"
-          >
-            {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+          <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={handleFileUpload} />
+          <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="df-button-primary">
+            {uploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
             {uploading ? "업로드 중..." : "PDF 도면 업로드"}
           </button>
         </div>
       </div>
 
-      {/* 도면 목록 */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
-        <div className="px-6 py-4 border-b border-slate-100">
-          <h2 className="font-black text-slate-800">도면 목록 ({drawings.length})</h2>
+      <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <p className="flex items-start gap-2">
+          <ShieldAlert size={16} className="mt-0.5 flex-shrink-0" />
+          실제 고객 도면은 아직 업로드하지 마세요. V4는 로컬 저장 기반이며 OCR/권한 관리가 운영 수준으로 적용되기 전입니다.
+        </p>
+      </div>
+
+      <div className="df-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-4">
+          <div>
+            <h2 className="font-black text-slate-900">도면 목록 ({drawings.length})</h2>
+            <p className="mt-1 text-xs text-slate-500">PDF를 업로드한 뒤 분석 화면에서 공차 후보를 검토합니다.</p>
+          </div>
         </div>
 
         {drawings.length === 0 ? (
-          <div className="py-16 flex flex-col items-center text-center">
-            <div className="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center mb-4">
-              <Upload size={24} className="text-teal-600" />
+          <div className="flex flex-col items-center px-6 py-16 text-center">
+            <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-teal-50 text-teal-700">
+              <Upload size={24} />
             </div>
-            <p className="font-bold text-slate-700 mb-1">도면이 없습니다</p>
-            <p className="text-sm text-slate-400">
-              PDF 도면을 업로드하면 공차 분석을 바로 시작할 수 있습니다.
-            </p>
+            <p className="font-black text-slate-800">아직 도면이 없습니다</p>
+            <p className="mt-1 text-sm text-slate-500">샘플 PDF 도면을 업로드해서 공차 검토 흐름을 확인하세요.</p>
           </div>
         ) : (
           <ul className="divide-y divide-slate-100">
-            {drawings.map((d) => (
-              <li key={d.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 group">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <FileText size={16} className="text-slate-500" />
+            {drawings.map((drawing) => (
+              <li key={drawing.id} className="group flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500">
+                    <FileText size={17} />
                   </div>
-                  <div>
-                    <p className="font-semibold text-slate-800 text-sm">{d.fileName}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      {(d.fileSize / 1024).toFixed(0)} KB · {d.createdAt.slice(0, 10)}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-slate-900">{drawing.fileName}</p>
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      {(drawing.fileSize / 1024).toFixed(0)} KB · {drawing.createdAt.slice(0, 10)}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <StatusChip status={d.status} />
-                  <Link
-                    href={`/drawings/${d.id}`}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-lg transition-colors"
-                  >
-                    <Play size={11} />
-                    분석 시작
+                <div className="flex flex-shrink-0 items-center gap-2">
+                  <StatusChip status={drawing.status} />
+                  <Link href={`/drawings/${drawing.id}`} className="df-button-primary h-8 px-3 text-xs">
+                    <Play size={12} /> 분석
                   </Link>
                   <button
-                    onClick={() => deleteDrawing(d.id)}
-                    className="p-1.5 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                    onClick={() => deleteDrawing(drawing.id)}
+                    className="rounded p-2 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+                    title="도면 삭제"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -160,14 +160,15 @@ export default function ProjectClient({ projectId }: { projectId: string }) {
 
 function StatusChip({ status }: { status: Drawing["status"] }) {
   const map: Record<Drawing["status"], { label: string; cls: string }> = {
-    pending: { label: "대기", cls: "bg-slate-100 text-slate-500" },
-    extracting: { label: "추출 중", cls: "bg-blue-100 text-blue-600" },
-    analyzing: { label: "분석 중", cls: "bg-amber-100 text-amber-600" },
+    pending: { label: "대기", cls: "bg-slate-100 text-slate-600" },
+    extracting: { label: "판독 중", cls: "bg-blue-100 text-blue-700" },
+    analyzing: { label: "분석 중", cls: "bg-amber-100 text-amber-700" },
     done: { label: "완료", cls: "bg-teal-100 text-teal-700" },
-    error: { label: "오류", cls: "bg-red-100 text-red-600" },
+    error: { label: "확인 필요", cls: "bg-red-100 text-red-700" },
   };
-  const { label, cls } = map[status];
-  return <span className={`px-2 py-0.5 rounded text-xs font-semibold ${cls}`}>{label}</span>;
+
+  const item = map[status];
+  return <span className={`rounded px-2 py-1 text-xs font-bold ${item.cls}`}>{item.label}</span>;
 }
 
 function fileToDataUrl(file: File): Promise<string> {

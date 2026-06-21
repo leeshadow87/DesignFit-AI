@@ -1,7 +1,8 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, FolderOpen, ChevronRight, Trash2 } from "lucide-react";
+import { ChevronRight, FolderOpen, Plus, ShieldAlert, Trash2 } from "lucide-react";
 import { repository } from "@/lib/repository";
 import type { Project } from "@/types";
 
@@ -13,66 +14,65 @@ export default function ProjectsListClient() {
   }, []);
 
   async function deleteProject(id: string) {
-    if (!confirm("이 프로젝트를 삭제합니까? 모든 도면 분석 결과가 함께 삭제됩니다.")) return;
+    if (!confirm("프로젝트를 삭제할까요? 연결된 도면과 분석 결과도 함께 삭제됩니다.")) return;
     await repository.deleteProject(id);
-    setProjects((prev) => prev.filter((p) => p.id !== id));
+    setProjects((prev) => prev.filter((project) => project.id !== id));
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 lg:p-8">
+      <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-xs font-black text-teal-600 uppercase tracking-widest mb-1">Projects</p>
-          <h1 className="text-2xl font-black text-slate-800">프로젝트 목록</h1>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-teal-700">Projects</p>
+          <h1 className="mt-1 text-2xl font-black text-slate-900">프로젝트 목록</h1>
+          <p className="mt-1 text-sm text-slate-500">샘플 도면과 검증용 프로젝트만 관리하세요.</p>
         </div>
-        <Link
-          href="/projects/new"
-          className="flex items-center gap-1.5 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold rounded-lg transition-colors"
-        >
-          <Plus size={14} />
-          새 프로젝트
+        <Link href="/projects/new" className="df-button-primary">
+          <Plus size={15} /> 새 프로젝트
         </Link>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+      <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <p className="flex items-start gap-2">
+          <ShieldAlert size={16} className="mt-0.5 flex-shrink-0" />
+          실제 고객 도면, 사내 도번, 업체명은 아직 업로드하지 마세요. V4는 검증용 로컬 저장 기반입니다.
+        </p>
+      </div>
+
+      <div className="df-card overflow-hidden">
         {projects.length === 0 ? (
-          <div className="py-16 flex flex-col items-center text-center">
-            <FolderOpen size={28} className="text-slate-300 mb-3" />
-            <p className="font-bold text-slate-700 mb-1">프로젝트가 없습니다</p>
-            <p className="text-sm text-slate-400 mb-5">새 프로젝트를 만들고 도면을 업로드하세요.</p>
-            <Link
-              href="/projects/new"
-              className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold rounded-lg transition-colors"
-            >
-              <Plus size={13} />
-              새 프로젝트 만들기
+          <div className="flex flex-col items-center px-6 py-16 text-center">
+            <FolderOpen size={30} className="mb-3 text-slate-300" />
+            <p className="font-black text-slate-800">프로젝트가 없습니다</p>
+            <p className="mt-1 text-sm text-slate-500">새 프로젝트를 만들고 PDF 도면을 업로드하세요.</p>
+            <Link href="/projects/new" className="df-button-primary mt-5">
+              <Plus size={14} /> 첫 프로젝트 만들기
             </Link>
           </div>
         ) : (
           <ul className="divide-y divide-slate-100">
-            {projects.map((p) => (
-              <li key={p.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 group transition-colors">
-                <Link href={`/projects/${p.id}`} className="flex-1 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
-                    <FolderOpen size={16} className="text-teal-600" />
+            {projects.map((project) => (
+              <li key={project.id} className="group flex items-center justify-between px-5 py-4 hover:bg-slate-50">
+                <Link href={`/projects/${project.id}`} className="flex flex-1 items-center gap-4">
+                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-teal-50 text-teal-700">
+                    <FolderOpen size={17} />
                   </div>
                   <div>
-                    <p className="font-bold text-slate-800 group-hover:text-teal-700 transition-colors">
-                      {p.name}
-                    </p>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      {p.customerName && `${p.customerName} · `}
-                      도면 {p.drawingCount}개 · {p.updatedAt.slice(0, 10)}
+                    <p className="font-bold text-slate-900 group-hover:text-teal-700">{project.name}</p>
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      {project.customerName ? `${project.customerName} · ` : ""}
+                      도면 {project.drawingCount}개 · {project.updatedAt.slice(0, 10)}
                     </p>
                   </div>
                 </Link>
                 <div className="flex items-center gap-2">
-                  <ChevronRight size={14} className="text-slate-300 group-hover:text-teal-600 transition-colors" />
+                  <ChevronRight size={15} className="text-slate-300 group-hover:text-teal-600" />
                   <button
-                    onClick={(e) => { e.preventDefault(); deleteProject(p.id); }}
-                    className="p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                    onClick={() => deleteProject(project.id)}
+                    className="rounded p-2 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+                    title="프로젝트 삭제"
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </li>
