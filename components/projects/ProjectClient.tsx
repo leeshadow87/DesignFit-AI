@@ -19,7 +19,10 @@ export default function ProjectClient({ projectId }: { projectId: string }) {
 
   async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    if (!file || !file.name.toLowerCase().endsWith(".pdf")) return;
+    if (!file || !file.name.toLowerCase().endsWith(".pdf")) {
+      alert("현재 V5는 PDF 업로드만 지원합니다. PNG/HTML 도면은 PDF로 변환한 뒤 업로드하세요.");
+      return;
+    }
     setUploading(true);
 
     try {
@@ -82,8 +85,8 @@ export default function ProjectClient({ projectId }: { projectId: string }) {
 
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-teal-700">Project</p>
-          <h1 className="mt-1 text-3xl font-black text-slate-900">{project.name}</h1>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Review Project</p>
+          <h1 className="df-heading mt-1 text-3xl font-black text-slate-900">{project.name}</h1>
           {project.customerName && <p className="mt-1 text-sm text-slate-500">{project.customerName}</p>}
           {project.description && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">{project.description}</p>}
         </div>
@@ -100,7 +103,8 @@ export default function ProjectClient({ projectId }: { projectId: string }) {
       <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
         <p className="flex items-start gap-2">
           <ShieldAlert size={16} className="mt-0.5 flex-shrink-0" />
-          실제 고객 도면은 아직 업로드하지 마세요. V4는 로컬 저장 기반이며 OCR/권한 관리가 운영 수준으로 적용되기 전입니다.
+          실제 고객 도면은 아직 업로드하지 마세요. V5는 로컬 저장 기반이며, 권한 관리와 비공개 저장 구조가 붙기 전까지
+          공개 샘플 도면만 사용하는 것이 좋습니다.
         </p>
       </div>
 
@@ -108,17 +112,17 @@ export default function ProjectClient({ projectId }: { projectId: string }) {
         <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-4">
           <div>
             <h2 className="font-black text-slate-900">도면 목록 ({drawings.length})</h2>
-            <p className="mt-1 text-xs text-slate-500">PDF를 업로드한 뒤 분석 화면에서 공차 후보를 검토합니다.</p>
+            <p className="mt-1 text-xs text-slate-500">PDF를 업로드한 뒤 분석 화면에서 공차, GD&T, 제조성 리스크를 검토합니다.</p>
           </div>
         </div>
 
         {drawings.length === 0 ? (
           <div className="flex flex-col items-center px-6 py-16 text-center">
-            <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-teal-50 text-teal-700">
+            <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
               <Upload size={24} />
             </div>
             <p className="font-black text-slate-800">아직 도면이 없습니다</p>
-            <p className="mt-1 text-sm text-slate-500">샘플 PDF 도면을 업로드해서 공차 검토 흐름을 확인하세요.</p>
+            <p className="mt-1 text-sm text-slate-500">샘플 PDF 도면을 업로드해서 제조성 검토 흐름을 확인하세요.</p>
           </div>
         ) : (
           <ul className="divide-y divide-slate-100">
@@ -131,7 +135,7 @@ export default function ProjectClient({ projectId }: { projectId: string }) {
                   <div className="min-w-0">
                     <p className="truncate text-sm font-bold text-slate-900">{drawing.fileName}</p>
                     <p className="mt-0.5 text-xs text-slate-500">
-                      {(drawing.fileSize / 1024).toFixed(0)} KB · {drawing.createdAt.slice(0, 10)}
+                      {(drawing.fileSize / 1024).toFixed(0)} KB / {drawing.createdAt.slice(0, 10)}
                     </p>
                   </div>
                 </div>
@@ -163,7 +167,7 @@ function StatusChip({ status }: { status: Drawing["status"] }) {
     pending: { label: "대기", cls: "bg-slate-100 text-slate-600" },
     extracting: { label: "판독 중", cls: "bg-blue-100 text-blue-700" },
     analyzing: { label: "분석 중", cls: "bg-amber-100 text-amber-700" },
-    done: { label: "완료", cls: "bg-teal-100 text-teal-700" },
+    done: { label: "완료", cls: "bg-emerald-100 text-emerald-700" },
     error: { label: "확인 필요", cls: "bg-red-100 text-red-700" },
   };
 

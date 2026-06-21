@@ -39,17 +39,17 @@ export default function NewProjectClient() {
         <ArrowLeft size={14} /> 프로젝트 목록
       </Link>
 
-      <p className="text-xs font-black uppercase tracking-[0.22em] text-teal-700">New Project</p>
-      <h1 className="mt-1 text-2xl font-black text-slate-900">새 검토 프로젝트</h1>
+      <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">New Review Project</p>
+      <h1 className="df-heading mt-1 text-2xl font-black text-slate-900">새 제조성 검토 프로젝트</h1>
       <p className="mt-2 text-sm leading-relaxed text-slate-500">
-        V4 시제품에서는 샘플 도면과 공개 도면만 사용하세요. 실제 고객명은 필요할 때만
-        익명화해서 입력하는 것을 권장합니다.
+        V5 시제품에서는 공개 샘플 도면과 검증용 도면만 사용하세요. 실제 고객명은 필요할 때만 익명화해서 입력하는
+        것을 권장합니다.
       </p>
 
       <div className="my-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
         <p className="flex items-start gap-2">
           <ShieldAlert size={16} className="mt-0.5 flex-shrink-0" />
-          보안 도면, 사내 도번, 고객사 실명은 입력하지 마세요. 운영 저장소 적용 전까지는 검증용입니다.
+          보안 도면, 사내 도번, 업체명, 고객 실명은 업로드하지 마세요. 현재 버전은 공개 샘플 기반 MVP입니다.
         </p>
       </div>
 
@@ -62,8 +62,8 @@ export default function NewProjectClient() {
             type="text"
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="예: 터빈 디스크 공차 완화 검토"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+            placeholder="예: 터빈 디스크 도면 제조성 검토"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
             required
           />
         </div>
@@ -74,8 +74,8 @@ export default function NewProjectClient() {
             type="text"
             value={customerName}
             onChange={(event) => setCustomerName(event.target.value)}
-            placeholder="예: 내부 검증, 샘플 프로젝트"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+            placeholder="예: 내부 검증 샘플 프로젝트"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
           />
         </div>
 
@@ -84,9 +84,9 @@ export default function NewProjectClient() {
           <textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="검토 목적, 공정 가정, 샘플 도면 출처를 간단히 기록하세요."
+            placeholder="검토 목적, 예상 공정, 확인하고 싶은 공차 또는 GD&T 항목을 간단히 적어주세요."
             rows={4}
-            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+            className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
           />
         </div>
 

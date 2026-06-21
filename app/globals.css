@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 :root {
-  --df-bg: #f4f7f9;
+  --df-bg: #f3f6f8;
   --df-panel: #ffffff;
-  --df-ink: #17212b;
+  --df-ink: #141c24;
   --df-muted: #667485;
   --df-line: #d8e0e7;
-  --df-navy: #172936;
-  --df-navy-2: #203747;
-  --df-green: #03c75a;
+  --df-navy: #132532;
+  --df-navy-2: #1e3748;
+  --df-green: #00a862;
   --df-teal: #087d73;
   --df-red: #c92a2a;
   --df-orange: #d97706;
@@ -32,6 +32,7 @@ body {
   color: var(--df-ink);
   font-family: Pretendard, "Noto Sans KR", Inter, "Segoe UI", Arial, sans-serif;
   letter-spacing: 0;
+  text-rendering: geometricPrecision;
 }
 
 button,
@@ -39,6 +40,11 @@ input,
 select,
 textarea {
   font-family: inherit;
+}
+
+.df-heading {
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 ::-webkit-scrollbar {
@@ -64,7 +70,7 @@ textarea {
 }
 
 .df-button-primary {
-  @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-teal-700 bg-teal-700 px-4 text-sm font-extrabold text-white transition-colors hover:bg-teal-800;
+  @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-emerald-700 bg-emerald-700 px-4 text-sm font-extrabold text-white transition-colors hover:bg-emerald-800;
 }
 
 .df-button-green {

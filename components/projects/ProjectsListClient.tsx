@@ -23,9 +23,9 @@ export default function ProjectsListClient() {
     <div className="p-4 lg:p-8">
       <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-teal-700">Projects</p>
-          <h1 className="mt-1 text-2xl font-black text-slate-900">프로젝트 목록</h1>
-          <p className="mt-1 text-sm text-slate-500">샘플 도면과 검증용 프로젝트만 관리하세요.</p>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Projects</p>
+          <h1 className="df-heading mt-1 text-2xl font-black text-slate-900">제조성 검토 프로젝트</h1>
+          <p className="mt-1 text-sm text-slate-500">샘플 도면과 검증용 프로젝트를 관리합니다.</p>
         </div>
         <Link href="/projects/new" className="df-button-primary">
           <Plus size={15} /> 새 프로젝트
@@ -35,7 +35,7 @@ export default function ProjectsListClient() {
       <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
         <p className="flex items-start gap-2">
           <ShieldAlert size={16} className="mt-0.5 flex-shrink-0" />
-          실제 고객 도면, 사내 도번, 업체명은 아직 업로드하지 마세요. V4는 검증용 로컬 저장 기반입니다.
+          실제 고객 도면, 사내 도번, 업체명은 아직 업로드하지 마세요. V5는 검증용 로컬 저장 기반입니다.
         </p>
       </div>
 
@@ -43,7 +43,7 @@ export default function ProjectsListClient() {
         {projects.length === 0 ? (
           <div className="flex flex-col items-center px-6 py-16 text-center">
             <FolderOpen size={30} className="mb-3 text-slate-300" />
-            <p className="font-black text-slate-800">프로젝트가 없습니다</p>
+            <p className="font-black text-slate-800">아직 프로젝트가 없습니다</p>
             <p className="mt-1 text-sm text-slate-500">새 프로젝트를 만들고 PDF 도면을 업로드하세요.</p>
             <Link href="/projects/new" className="df-button-primary mt-5">
               <Plus size={14} /> 첫 프로젝트 만들기
@@ -54,19 +54,19 @@ export default function ProjectsListClient() {
             {projects.map((project) => (
               <li key={project.id} className="group flex items-center justify-between px-5 py-4 hover:bg-slate-50">
                 <Link href={`/projects/${project.id}`} className="flex flex-1 items-center gap-4">
-                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-teal-50 text-teal-700">
+                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-emerald-700">
                     <FolderOpen size={17} />
                   </div>
                   <div>
-                    <p className="font-bold text-slate-900 group-hover:text-teal-700">{project.name}</p>
+                    <p className="font-bold text-slate-900 group-hover:text-emerald-700">{project.name}</p>
                     <p className="mt-0.5 text-xs text-slate-500">
-                      {project.customerName ? `${project.customerName} · ` : ""}
-                      도면 {project.drawingCount}개 · {project.updatedAt.slice(0, 10)}
+                      {project.customerName ? `${project.customerName} / ` : ""}
+                      도면 {project.drawingCount}개 / {project.updatedAt.slice(0, 10)}
                     </p>
                   </div>
                 </Link>
                 <div className="flex items-center gap-2">
-                  <ChevronRight size={15} className="text-slate-300 group-hover:text-teal-600" />
+                  <ChevronRight size={15} className="text-slate-300 group-hover:text-emerald-600" />
                   <button
                     onClick={() => deleteProject(project.id)}
                     className="rounded p-2 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"

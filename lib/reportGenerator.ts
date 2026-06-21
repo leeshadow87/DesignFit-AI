@@ -1,15 +1,5 @@
-/**
- * reportGenerator.ts
- * 분석 결과를 PDF·CSV 리포트로 내보낸다.
- * jsPDF / xlsx 라이브러리 사용 (클라이언트 전용)
- */
-
-import type { Report, ReportItem, RiskLevel, RecommendationStatus } from "@/types";
+import type { Report, ReportItem, RecommendationStatus, RiskLevel } from "@/types";
 import { riskLabel, statusLabel } from "./toleranceRules";
-
-// ============================================================
-// CSV 내보내기
-// ============================================================
 
 export function exportCsv(report: Report): void {
   const headers = [
@@ -22,7 +12,7 @@ export function exportCsv(report: Report): void {
     "주의사항",
     "기능 답변",
     "CAE 필요",
-    "선임자 검토",
+    "선임 검토",
   ];
 
   const rows = report.items.map((item) => [
@@ -39,19 +29,13 @@ export function exportCsv(report: Report): void {
   ]);
 
   const csvContent = [headers, ...rows]
-    .map((row) =>
-      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
-    )
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
     .join("\n");
 
-  const bom = "﻿"; // Excel UTF-8 BOM
+  const bom = "\ufeff";
   const blob = new Blob([bom + csvContent], { type: "text/csv;charset=utf-8;" });
   downloadBlob(blob, `DesignFit_${report.drawingName}_${formatDate(report.generatedAt)}.csv`);
 }
-
-// ============================================================
-// PDF 내보내기 (동적 import — 서버 사이드 제외)
-// ============================================================
 
 export async function exportPdf(report: Report): Promise<void> {
   const { default: jsPDF } = await import("jspdf");
@@ -59,10 +43,9 @@ export async function exportPdf(report: Report): Promise<void> {
 
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-  // 한국어 지원 — 기본 폰트는 ASCII만 지원하므로 영문 대체 표기
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.text("DesignFit-AI V3 Tolerance Review Report", 14, 18);
+  doc.text("DesignFit-AI V5 Manufacturing Review Report", 14, 18);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
@@ -120,10 +103,6 @@ export async function exportPdf(report: Report): Promise<void> {
   doc.save(`DesignFit_${report.drawingName}_${formatDate(report.generatedAt)}.pdf`);
 }
 
-// ============================================================
-// Report 빌더
-// ============================================================
-
 export function buildReport(
   projectId: string,
   drawingId: string,
@@ -152,10 +131,6 @@ export function buildReport(
     items,
   };
 }
-
-// ============================================================
-// 유틸
-// ============================================================
 
 function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);

@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowLeft,
-  CheckCircle2,
   Download,
   FileText,
   Loader2,
@@ -26,7 +25,7 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [manualText, setManualText] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
-  const [notice, setNotice] = useState("PDF 텍스트 레이어가 없으면 OCR 또는 수동 보정이 필요합니다.");
+  const [notice, setNotice] = useState("PDF 텍스트 레이어가 없으면 OCR 또는 수동 보정 입력이 필요합니다.");
 
   useEffect(() => {
     async function load() {
@@ -45,7 +44,7 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
   const runAnalysis = useCallback(async () => {
     if (!drawing) return;
     setAnalyzing(true);
-    setNotice("도면 텍스트를 판독하고 있습니다.");
+    setNotice("도면 텍스트를 판독하고 제조성 리스크를 계산하는 중입니다.");
 
     try {
       let text = manualText.trim();
@@ -71,10 +70,10 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
       setDrawing(done);
       setCases(result.cases);
       setSelected(result.cases[0] ?? null);
-      setNotice(`분석 완료: 공차 후보 ${result.cases.length}개를 찾았습니다.`);
+      setNotice(`분석 완료: 공차/GD&T 후보 ${result.cases.length}개를 찾았습니다.`);
     } catch (error) {
       console.error(error);
-      setNotice("분석 중 오류가 발생했습니다. PDF 형식 또는 텍스트 입력을 확인하세요.");
+      setNotice("분석 중 오류가 발생했습니다. PDF 형식 또는 수동 입력 내용을 확인하세요.");
     } finally {
       setAnalyzing(false);
     }
@@ -123,13 +122,13 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
               <ArrowLeft size={16} />
             </Link>
             <div>
-              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-teal-700">
+              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-emerald-700">
                 <FileText size={14} />
-                Drawing Analysis
+                Drawing Manufacturing Review
               </p>
-              <h1 className="mt-1 text-lg font-black text-slate-900">{drawing.fileName}</h1>
+              <h1 className="df-heading mt-1 text-lg font-black text-slate-900">{drawing.fileName}</h1>
               <p className="mt-1 text-sm text-slate-500">
-                {project?.name ?? "프로젝트"} · 로컬 검증 저장 · V4 MVP
+                {project?.name ?? "프로젝트"} / 로컬 검증 저장 / V5 MVP
               </p>
             </div>
           </div>
@@ -172,7 +171,7 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
         <section className="df-card overflow-hidden">
           <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
             <p className="text-sm font-black text-slate-900">선택 공차 판단</p>
-            <p className="text-xs text-slate-500">위험도와 완화 가능성을 분리해서 검토합니다.</p>
+            <p className="text-xs text-slate-500">위험도, 완화 가능성, 검증 필요 조건을 분리해서 검토합니다.</p>
           </div>
           {selected ? (
             <div className="grid gap-4 p-4">
@@ -180,7 +179,7 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
                 <div>
                   <p className="font-mono text-sm font-black text-slate-900">{selected.rawText}</p>
                   <p className="mt-1 text-sm text-slate-500">
-                    {selected.toleranceType} · {selected.featureType} · page {selected.pageNumber ?? 1}
+                    {selected.toleranceType} / {selected.featureType} / page {selected.pageNumber ?? 1}
                   </p>
                 </div>
                 <span className={`rounded px-2 py-1 text-xs font-black badge-${selected.riskLevel}`}>
@@ -194,7 +193,7 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
                 <p className="text-xs font-black text-slate-700">검증 질문</p>
                 {selected.suggestedQuestions.slice(0, 3).map((q) => (
                   <p key={q} className="text-sm leading-relaxed text-slate-600">
-                    · {q}
+                    - {q}
                   </p>
                 ))}
               </div>
@@ -207,14 +206,14 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
         <section className="df-card overflow-hidden">
           <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
             <p className="text-sm font-black text-slate-900">수동 보정 입력</p>
-            <p className="text-xs text-slate-500">OCR 미연동 단계에서는 도면의 공차 문구를 붙여넣어 검증합니다.</p>
+            <p className="text-xs text-slate-500">OCR이 부족할 때 도면의 공차 문구를 붙여넣어 검증합니다.</p>
           </div>
           <div className="p-4">
             <textarea
               value={manualText}
               onChange={(e) => setManualText(e.target.value)}
               rows={6}
-              className="h-32 w-full resize-none rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="h-32 w-full resize-none rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
               placeholder="예: DIA 18.000 H7, POSITION DIA 0.025 A|B|C, FLATNESS 0.01, Ra 0.8, +/-0.01"
             />
           </div>
@@ -222,7 +221,7 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
 
         <section className="df-card overflow-hidden lg:col-span-2">
           <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-            <p className="text-sm font-black text-slate-900">공차 후보 목록</p>
+            <p className="text-sm font-black text-slate-900">공차/GD&T 후보 목록</p>
             <p className="text-xs text-slate-500">가장 위험한 항목부터 검토합니다.</p>
           </div>
           <div className="max-h-[260px] overflow-auto">
@@ -246,7 +245,7 @@ export default function DrawingAnalysisClient({ drawingId }: { drawingId: string
                     <tr
                       key={tc.id}
                       onClick={() => setSelected(tc)}
-                      className={`cursor-pointer hover:bg-slate-50 ${selected?.id === tc.id ? "bg-teal-50/60" : ""}`}
+                      className={`cursor-pointer hover:bg-slate-50 ${selected?.id === tc.id ? "bg-emerald-50/60" : ""}`}
                     >
                       <td className="border-b border-slate-100 px-4 py-3">
                         <span className={`rounded px-2 py-1 text-xs font-black badge-${tc.riskLevel}`}>
