@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ClipboardList, Database, FileSearch, FolderOpen, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { Calculator, ClipboardList, Database, FileSearch, FolderOpen, GitBranch, LayoutDashboard, ShieldCheck } from "lucide-react";
 
 const nav = [
-  { href: "/", label: "AI 검토 홈", meta: "Review", icon: FileSearch },
+  { href: "/", label: "계산 콘솔", meta: "V6", icon: Calculator },
   { href: "/projects", label: "프로젝트", meta: "Files", icon: FolderOpen },
   { href: "/projects/new", label: "새 검토 생성", meta: "New", icon: LayoutDashboard },
 ];
@@ -21,7 +21,7 @@ export default function Sidebar() {
         </div>
         <div>
           <p className="text-sm font-black leading-tight">DesignFit-AI</p>
-          <p className="mt-1 text-[11px] font-semibold text-slate-400">Manufacturing Intelligence</p>
+          <p className="mt-1 text-[11px] font-semibold text-slate-400">Tolerance Calculation SaaS</p>
         </div>
       </div>
 
@@ -54,19 +54,26 @@ export default function Sidebar() {
           검증용 시제품
         </div>
         <p className="text-xs leading-relaxed text-slate-300">
-          실제 고객 도면, 보안 도면, 사내 도번은 업로드하지 마세요. 현재 버전은 공개 샘플 도면으로
-          도면 판독과 제조성 검토 흐름을 검증하는 단계입니다.
+          실제 고객 도면, 보안 도면, 사내 도번은 업로드하지 마세요. 현재 버전은 공개 샘플로 계산 흐름을 검증합니다.
         </p>
+      </div>
+
+      <div className="mt-4 grid gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-slate-300">
+        <p className="flex items-center gap-2 font-bold text-white">
+          <GitBranch size={14} />
+          부품-어셈블리 연계
+        </p>
+        <p>단품 공차만으로 완화 확정 금지. 상위 조립 정보가 필요합니다.</p>
       </div>
 
       <div className="mt-auto grid gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-slate-300">
         <p className="flex items-center gap-2 font-bold text-white">
           <Database size={14} />
-          V5 검토 범위
+          V6 계산 범위
         </p>
         <p className="flex items-start gap-2">
           <ClipboardList size={14} className="mt-0.5 text-slate-500" />
-          공차, GD&T, 재질, 공정 난이도, 검사 방식, 비용 영향, CAE 검증 필요성을 함께 정리합니다.
+          치수 범위, 공차 누적, 간극/간섭, 기능 치수 체인, CAE 필요 여부를 분리합니다.
         </p>
       </div>
     </aside>

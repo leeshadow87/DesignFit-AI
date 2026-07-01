@@ -1,6 +1,6 @@
 {
-  "name": "designfit-ai-v5",
-  "version": "5.0.0",
+  "name": "designfit-ai-v6",
+  "version": "6.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
